@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     // Basic Gradle dependencies
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     // Logging dependencies
@@ -20,57 +20,47 @@ dependencies {
     runtimeOnly 'org.slf4j:slf4j-log4j12:1.7.7'
 
     // Jetty dependencies
-    implementation 'org.eclipse.jetty:jetty-server:10.0.2'
-    implementation 'org.eclipse.jetty:jetty-servlet:10.0.2'
-    implementation 'org.eclipse.jetty:jetty-util:10.0.2'
+    implementation 'org.eclipse.jetty:jetty-server:11.0.0'
+    implementation 'org.eclipse.jetty:jetty-servlet:11.0.0'
+    implementation 'org.eclipse.jetty:jetty-util:11.0.0'
 
     // Jersey dependencies
-    implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:2.34' //3.0.2'
-    implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.34'
-    implementation 'org.glassfish.jersey.core:jersey-server:2.34'
+    implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:3.0.2'
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core:3.0.2'
+//    implementation 'org.glassfish.jersey.core:jersey-server:3.0.2'
+    implementation 'org.glassfish.jersey.media:jersey-media-json-binding:3.0.2'
+    implementation 'org.glassfish.jersey.core:jersey-common:3.0.2'
     // Jetty and Jersey InjectionManagerFactory dependency [Required]
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.34'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:3.0.2'
     // Enable JAXBContext and WADL Jersey [Required]
-    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.4' //3.0.1'
-//    implementation 'org.glassfish.jersey.core:jersey-common:3.0.2'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
+
 
     // Redis & Json dependencies
     implementation 'org.springframework.data:spring-data-redis:2.4.3'
     implementation 'redis.clients:jedis:3.3.0'
     implementation group: 'org.json', name: 'json', version: '20201115'
 
-    // Jakarta JAX-RS dependency for HTTP Methods
-    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
-//    implementation 'jakarta.ws.rs:jakarta.ws.rs-api:3.0.0'
+    // Swagger, Jakarta deps
+    implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.1.9'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api:3.0.0'
+    implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
-    // swagger-core into JAX-RS app integration dependencies
-//    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.1.9'
-//    implementation 'io.swagger.core.v3:swagger-jaxrs2-servlet-initializer-v2-jakarta:2.1.9'
-//    implementation 'io.swagger.core.v3:swagger-core-jakarta:2.1.9'
-//    implementation 'io.swagger.core.v3:swagger-annotations-jakarta:2.1.9'
-    implementation 'io.swagger.core.v3:swagger-jaxrs2:2.1.9' // jaxrs dependency
-    implementation 'io.swagger.core.v3:swagger-jaxrs2-servlet-initializer:2.1.9' // jaxrs dependency
-    implementation 'io.swagger.core.v3:swagger-core:2.1.9'
-    implementation 'io.swagger.core.v3:swagger-core:2.1.9'
-    implementation 'io.swagger.core.v3:swagger-annotations:2.1.9'
 
-    // classpath artifacts for gradle plugin
-//    runtimeClasspath (
-//            'org.apache.commons:commons-lang3:3.7',
-//            'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.1.7',
-//            'jakarta.ws.rs:jakarta.ws.rs-api:3.0.0',
-//            'jakarta.servlet:jakarta.servlet-api:5.0.0'
-//    )
 }
 
-//resolve {
-//    outputFileName = 'HFS-API'
-//    outputFormat = 'YAML'
-//    prettyPrint = 'TRUE'
-//    buildClasspath = sourceSets.main.runtimeClasspath
-//    resourcePackages = ['io.test']
-//    outputDir = file('test')
-//}
+resolve {
+    outputFileName = 'MyRestAPI'
+    outputFormat = 'YAML'
+    prettyPrint = 'TRUE'
+    classpath = sourceSets.main.runtimeClasspath
+    buildClasspath = classpath
+    resourcePackages = ['io.test']
+    outputDir = file('test')
+}
 
 test {
     useJUnitPlatform()

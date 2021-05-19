@@ -1,12 +1,11 @@
 package com.cloudian.hfs.handlers;
 
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Path;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-
-import javax.ws.rs.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

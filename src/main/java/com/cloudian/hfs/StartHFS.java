@@ -1,7 +1,6 @@
 package com.cloudian.hfs;
 
 import com.cloudian.hfs.handlers.*;
-//import io.swagger.v3.jaxrs2.integration.OpenApiServlet;
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -106,7 +105,6 @@ public class StartHFS {
 //        servletContextHandler.setWelcomeFiles(new String[] {"index.html"});
 //        servletContextHandler.setResourceBase(resourceBasePath);
 //        servletContextHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
-
 
     }
 
