@@ -1,0 +1,1 @@
+package com.cloudian.hfs;import org.glassfish.jersey.servlet.ServletContainer;public class HelloServlet extends ServletContainer {}
