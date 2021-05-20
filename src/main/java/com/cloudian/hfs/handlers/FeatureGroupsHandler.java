@@ -10,7 +10,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
