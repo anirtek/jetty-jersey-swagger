@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.json.JSONArray;
@@ -77,8 +78,8 @@ public class FeatureGroupsHandler extends AbstractHandler {
     }
 
     @GET
-    @Path("/")
-    public void listFeatureGroups(Request jettyRequest,  HttpServletRequest request,  HttpServletResponse response) throws IOException, ParseException, JedisException, JSONException {
+    @Path("/featuregroups/")
+    public void listFeatureGroups(@Context Request jettyRequest, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, ParseException, JedisException, JSONException {
         String requestBody = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
         JSONObject jsonRequestBody = new JSONObject(requestBody);
         Jedis jedis = new Jedis(HOST);

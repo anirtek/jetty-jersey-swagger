@@ -8,12 +8,20 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.hk2.osgiresourcelocator.ServiceLoader;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+
+import java.util.Scanner;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 public class StartHFS {
@@ -58,6 +66,7 @@ public class StartHFS {
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         server.setHandler(contexts);
 
+/*
         ContextHandler logHandler = new ContextHandler("/log");
         logHandler.setHandler(new LoggingHandler());
         contexts.addHandler(logHandler);
@@ -65,11 +74,11 @@ public class StartHFS {
         ContextHandler helloHandler = new ContextHandler("/hello");
         helloHandler.setHandler(new HelloHandler());
         contexts.addHandler(helloHandler);
-
+*/
         ContextHandler featureStoreHandler = new ContextHandler("/featurestore");
         featureStoreHandler.setHandler(new FeatureStoreHandler());
         contexts.addHandler(featureStoreHandler);
-
+/*
         ContextHandler featureGroupsHandler = new ContextHandler("/featuregroups");
         featureGroupsHandler.setHandler(new FeatureGroupsHandler());
         contexts.addHandler(featureGroupsHandler);
@@ -77,13 +86,12 @@ public class StartHFS {
         ContextHandler recordsHandler = new ContextHandler("/FeatureGroup");
         recordsHandler.setHandler(new RecordsHandler());
         contexts.addHandler(recordsHandler);
-
+*/
 
         // Setup Jetty Servlet
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
         contexts.addHandler(servletContextHandler);
-
 
         // Setup API resources
         ServletHolder jersey = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
@@ -93,19 +101,18 @@ public class StartHFS {
         // Expose API definition independently into yaml/json
         ServletHolder openApi = servletContextHandler.addServlet(OpenApiServlet.class, "/openapi/*");
         openApi.setInitOrder(2);
-        openApi.setInitParameter("openApi.configuration.resourcePackages", "com.cloudian.handlers;io.swagger.sample.resource");
+        openApi.setInitParameter("openApi.configuration.resourcePackages", "com.cloudian.hfs.handlers");
 
 //        ServletHolder swaggerServlet = servletContextHandler.addServlet(.class, "/swagger-core");
 //        swaggerServlet.setInitOrder(2);
 //        swaggerServlet.setInitParameter("api.version", "1.0.0");
 //        swaggerServlet.setInitParameter("swagger.api.basepath", "http://localhost:8080/api");
 
-//        // Setup Swagger-UI static resources
-//        String resourceBasePath = ServicesRunner.class.getResource("/webapp").toExternalForm();
-//        servletContextHandler.setWelcomeFiles(new String[] {"index.html"});
-//        servletContextHandler.setResourceBase(resourceBasePath);
-//        servletContextHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
+        // Setup Swagger-UI static resources
+        String resourceBasePath = ServiceLoader.class.getResource("/webapp").toExternalForm();
+        servletContextHandler.setWelcomeFiles(new String[] {"index.html"});
+        servletContextHandler.setResourceBase(resourceBasePath);
+        servletContextHandler.addServlet(new ServletHolder(ServletContainer.class), "/*");
 
     }
-
 }

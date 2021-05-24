@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Can be tested with curl using commands like: curl -i -X GET http://127.0.0.1:8080/hello/
  */
-@Path("/hello")
+
 public class HelloHandler extends AbstractHandler {
 
     @Override

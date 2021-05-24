@@ -9,7 +9,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/log")
+
 public class LoggingHandler extends AbstractHandler {
 
     static Logger logger = (Logger) LoggerFactory.getLogger(LoggingHandler.class.getName());

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.json.JSONArray;
@@ -81,9 +82,9 @@ public class RecordsHandler extends AbstractHandler {
     //Hash Record:+<FG>+:+<RecordIdentifier> -> Features as keys and its values as values
 
     @PUT
-    @Path("/{id}")
+    @Path("/{featureGroup}")
     @Consumes("application/json")
-    public void putRecord(@PathParam("id") String featureGroup, Jedis jedis, @RequestBody HttpServletRequest request, HttpServletResponse response) throws IOException, JedisException, JSONException {
+    public void putRecord(@PathParam("featureGroup") String featureGroup, Jedis jedis, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JedisException, JSONException {
         String requestBody = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
         JSONObject jsonRequestBody = new JSONObject(requestBody);
         JSONArray record = (JSONArray) jsonRequestBody.get(RECORD);
@@ -116,7 +117,7 @@ public class RecordsHandler extends AbstractHandler {
 
     @GET
     @Path("/{id}")
-    public void getRecord(@PathParam("id") String featureGroup, @Schema Jedis jedis, @RequestBody HttpServletRequest request, HttpServletResponse response) throws IOException, JedisException, JSONException {
+    public void getRecord(@PathParam("id") String featureGroup, @Schema Jedis jedis,  @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JedisException, JSONException {
         String recordIdValue = request.getParameter(RECORD_IDENTIFIER_VALUE);
         String[] featureNames = request.getParameterValues(FEATURE_NAME);
         String recordKey = RECORD+":"+featureGroup+":"+recordIdValue;
@@ -164,7 +165,7 @@ public class RecordsHandler extends AbstractHandler {
     @DELETE
     @Path("/{id}")
     @Consumes("application/json")
-    public void deleteRecord(@PathParam("id") String featureGroup, @Schema Jedis jedis, @RequestBody HttpServletRequest request, HttpServletResponse response) throws IOException, JedisException, JSONException {
+    public void deleteRecord(@PathParam("id") String featureGroup, @Schema Jedis jedis,  @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JedisException, JSONException {
         String recordIdValue = request.getParameter(RECORD_IDENTIFIER_VALUE);
         String recordKey = RECORD+":"+featureGroup+":"+recordIdValue;
 

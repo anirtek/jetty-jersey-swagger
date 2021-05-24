@@ -1,9 +1,13 @@
 package com.cloudian.hfs.handlers;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.json.JSONArray;
@@ -11,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Map;
@@ -72,41 +77,55 @@ public class FeatureStoreHandler extends AbstractHandler {
     @Override
     public void handle(String target, Request jettyRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+        System.out.println("HANDLE" + target + "x");
         try {
-            if(request.getMethod().equals(POST_REQUEST)) {
-                if(target.equals("/")) {
-                    createFeatureGroup(jettyRequest, request, response);
+            if (request.getMethod().equals(POST_REQUEST)) {
+                if (target.equals("/")) {
+                    createFeatureGroup(request, response);
+                } else if (target.equals("/describe")) {
+                    describeFeatureGroup(request, response);
+                } else if (target.equals("/delete")) {
+                    deleteFeatureGroup(request, response);
                 }
-                else if(target.equals("/describe")){
-                    describeFeatureGroup(jettyRequest, request, response);
-                }
-                else if(target.equals("/delete")){
-                    deleteFeatureGroup(jettyRequest, request, response);
+            } else {
+                if (target.equals("/test")) {
+                    System.out.println("HANDLE tes " + target);
+                    test();
                 }
             }
-        }catch (JSONException e) {
+        } catch (JSONException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(RESPONSE_CONTENT_TYPE_TEXT);
-            response.getWriter().println(e.getClass().getSimpleName() +": " +e.getMessage());
-        }
-        catch (JedisException e) {
+            response.getWriter().println(e.getClass().getSimpleName() + ": " + e.getMessage());
+        } catch (JedisException e) {
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             response.setContentType(RESPONSE_CONTENT_TYPE_TEXT);
-            response.getWriter().println(e.getClass().getSimpleName() +": " +e.getMessage());
-        }
-        catch (Exception e) {
+            response.getWriter().println(e.getClass().getSimpleName() + ": " + e.getMessage());
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType(RESPONSE_CONTENT_TYPE_TEXT);
-            response.getWriter().println(e.getClass().getSimpleName() +": " +e.getMessage());
+            response.getWriter().println(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
 
         jettyRequest.setHandled(true);
     }
 
+    @GET
+    @Path("/test")
+    public String test() {
+        System.out.println("test");
+        return "TEST";
+    }
+
     @POST
     @Path("/create")
     @Consumes("application/json")
-    public void createFeatureGroup(@RequestBody Request jettyRequest, @RequestBody HttpServletRequest request, HttpServletResponse response) throws IOException, JSONException, JedisException {
+    @RequestBody(
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = JsonRequestBody.class)))
+    public void createFeatureGroup(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException, JedisException {
+        System.out.println("createFeatureGroup");
         String requestBody = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
         JSONObject jsonRequestBody = new JSONObject(requestBody);
         Jedis jedis = new Jedis(HOST);
@@ -116,7 +135,7 @@ public class FeatureStoreHandler extends AbstractHandler {
         String featureGroupKey = FEATURE_GROUP + ":" + jsonRequestBody.get(FEATURE_GROUP_NAME);
         JSONObject responseObject = new JSONObject();
 
-        if(jedis.sismember(FEATURE_GROUP, String.valueOf(jsonRequestBody.get(FEATURE_GROUP_NAME)))) {
+        if (jedis.sismember(FEATURE_GROUP, String.valueOf(jsonRequestBody.get(FEATURE_GROUP_NAME)))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(RESPONSE_CONTENT_TYPE_TEXT);
             response.getWriter().println("FeatureGroupName already exists");
@@ -125,7 +144,7 @@ public class FeatureStoreHandler extends AbstractHandler {
 
         jedis.sadd(FEATURE_GROUP, String.valueOf(jsonRequestBody.get(FEATURE_GROUP_NAME)));
 
-        for(int i = 0; i < featureDefinitions.length(); i++) {
+        for (int i = 0; i < featureDefinitions.length(); i++) {
             jedis.hset(featureDefinitionsKey, String.valueOf(featureDefinitions.getJSONObject(i).get(FEATURE_NAME)),
                     String.valueOf(featureDefinitions.getJSONObject(i).get(FEATURE_TYPE)));
         }
@@ -141,14 +160,14 @@ public class FeatureStoreHandler extends AbstractHandler {
 
         response.setContentType(RESPONSE_CONTENT_TYPE_JSON);
         response.setStatus(HttpServletResponse.SC_OK);
-        responseObject.put(FEATURE_GROUP_ARN,FEATURE_GROUP_ARN_VALUE);
+        responseObject.put(FEATURE_GROUP_ARN, FEATURE_GROUP_ARN_VALUE);
         response.getWriter().println(responseObject);
     }
 
     @DELETE
     @Path("/delete")
     @Consumes("application/json")
-    public void deleteFeatureGroup(@RequestBody Request jettyRequest, @RequestBody HttpServletRequest request, HttpServletResponse response) throws IOException, JedisException, JSONException {
+    public void deleteFeatureGroup(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JedisException, JSONException {
         String requestBody = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
         JSONObject jsonRequestBody = new JSONObject(requestBody);
         Jedis jedis = new Jedis(HOST);
@@ -156,12 +175,11 @@ public class FeatureStoreHandler extends AbstractHandler {
         String featureGroupKey = FEATURE_GROUP + ":" + jsonRequestBody.get(FEATURE_GROUP_NAME);
         String featureDefinitionsKey = FEATURE_DEFINITIONS + ":" + jsonRequestBody.get(FEATURE_GROUP_NAME);
 
-        if(!jedis.sismember(FEATURE_GROUP, featureGroupName)) {
+        if (!jedis.sismember(FEATURE_GROUP, featureGroupName)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(RESPONSE_CONTENT_TYPE_TEXT);
-            response.getWriter().println("FeatureGroup: "+ featureGroupName +" not found");
-        }
-        else {
+            response.getWriter().println("FeatureGroup: " + featureGroupName + " not found");
+        } else {
             jedis.hset(featureGroupKey, FEATURE_GROUP_STATUS, FeatureGroupStatus.DELETING.getValue());
             jedis.del(featureGroupKey);
             jedis.del(featureDefinitionsKey);
@@ -172,7 +190,7 @@ public class FeatureStoreHandler extends AbstractHandler {
 
     @GET
     @Path("/describe")
-    public void describeFeatureGroup(@RequestBody Request jettyRequest, @RequestBody HttpServletRequest request, HttpServletResponse response) throws IOException, JedisException, JSONException {
+    public void describeFeatureGroup(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JedisException, JSONException {
         String requestBody = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
         JSONObject jsonRequestBody = new JSONObject(requestBody);
         Jedis jedis = new Jedis(HOST);
@@ -183,20 +201,20 @@ public class FeatureStoreHandler extends AbstractHandler {
         JSONArray featureDefinitionsArray = new JSONArray();
         JSONObject onlineStoreConfig = new JSONObject();
 
-        if(!jedis.sismember(FEATURE_GROUP, featureGroupName)) {
+        if (!jedis.sismember(FEATURE_GROUP, featureGroupName)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(RESPONSE_CONTENT_TYPE_TEXT);
-            response.getWriter().println("FeatureGroup: "+ featureGroupName +" not found");
+            response.getWriter().println("FeatureGroup: " + featureGroupName + " not found");
             return;
         }
 
         Map<String, String> featureDefinitionsMap = jedis.hgetAll(featureDefinitionsKey);
         Iterator<Entry<String, String>> iterator = featureDefinitionsMap.entrySet().iterator();
 
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             Entry<String, String> entry = iterator.next();
             JSONObject featureDefinition = new JSONObject();
-            featureDefinition.put(FEATURE_NAME,entry.getKey());
+            featureDefinition.put(FEATURE_NAME, entry.getKey());
             featureDefinition.put(FEATURE_TYPE, entry.getValue());
             featureDefinitionsArray.put(featureDefinition);
         }
@@ -223,5 +241,9 @@ public class FeatureStoreHandler extends AbstractHandler {
         response.setContentType(RESPONSE_CONTENT_TYPE_JSON);
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println(jsonResponseBody);
+    }
+
+    public static class JsonRequestBody {
+        public String featureGroupName;
     }
 }
